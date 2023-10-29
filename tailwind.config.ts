@@ -8,15 +8,16 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-      },
       colors: {
-        "primary": "#181A1D",
-        "secondary": "#212428",
-        "ascent": "#287E9D"
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: "hsl(var(--primary))",
+        "primary-foreground": "hsl(var(--primary-foreground))",
+        ascent: "hsl(var(--ascent))",
+        "ascent-foreground": "hsl(var(--ascent-foreground))",
+      },
+      borderColor: {
+        DEFAULT: "hsl(var(--border))"
       }
     },
   },

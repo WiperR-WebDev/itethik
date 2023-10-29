@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    
+    /* TODO: Add secondary */
+  }
+
+  .dark{
+    --radius: 0.3rem;
+    --background: 216 9% 10%;
+    --foreground: 216 13% 90%;
+    --primary: 196 59% 39%;
+    --primary-foreground: 0 0% 100%;
+    --ascent: 214 10% 14%;
+    --ascent-foreground: 216 13% 90%;
+    --border: 240 6% 90%;
+  }
+}
