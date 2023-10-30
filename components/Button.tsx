@@ -7,15 +7,21 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        default: "bg-primary text-primary-foreground",
         ghost: "hover:text-primary",
       },
 
       size: {
+        large: "px-6 py-4 text-lg",
         default: "px-4 py-2",
         md: "px-3 py-2",
         sm: "px-2 py-1 text-xs",
         icon: "w-9 h-9",
       },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
     },
   }
 );
