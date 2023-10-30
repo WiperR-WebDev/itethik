@@ -1,46 +1,76 @@
 "use client";
 import Slider1 from "@/assets/images/slider-1.jpg";
 import Slider2 from "@/assets/images/slider-2.jpg";
+import Slider3 from "@/assets/images/slider-3.jpg";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import Button from "@/components/Button";
-import { useEffect, useRef, useState } from "react";
+import {
+  Children,
+  PropsWithChildren,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { motion, Variants, AnimatePresence, useAnimation } from "framer-motion";
 
 const variants: Variants = {
   initial: (direction) => ({
-    opacity: 0,
-    scale: 1.2,
+    rotateY: 90 * direction,
+    // y: direction < 0 ? "-50%" : "50%",
+    // scale: 1.2,
+    // opacity: 0,
     // left: direction < 0 ? "-100%" : "100%",
+    // filter: "blur(100px)",
   }),
   animate: {
-    opacity: 1,
-    scale: 1,
+    // filter: "blur(0px)",
+    rotateY: 0,
+    // opacity: 1,
+    // scale: 1,
     // left: "0",
+    // y: "0"
   },
   exit: (direction) => ({
-    opacity: 0,
-    scale: 1.2,
+    // filter: "blur(100px)",
+    // opacity: 0,
+    // scale: 1.2,
+    rotateY: -90 * direction,
+    // y: direction < 0 ? "50%" : "-50%",
+    // scale: 1.5
     // left: direction < 0 ? "100%" : "-100%",
   }),
 };
 
 type Direction = -1 | 1; // left | right;
 
-const textAnimation: Variants = {
-  hidden: {
-    opacity: 0,
-    y: "200%",
-  },
-
-  revealIn: {
-    opacity: 1,
-    y: "0",
-  },
-
-  hideOut: {
-    opacity: 0,
-    y: "-200%",
-  },
+const SlideIn = (props: PropsWithChildren) => {
+  const id = useId();
+  const childrenArray = Children.toArray(props.children);
+  return (
+    <>
+      {childrenArray.map((node, idx) => (
+        <motion.div className="overflow-hidden" key={`${id}-${idx}`}>
+          <motion.div
+            style={{ transformStyle: "preserve-3d" }}
+            transition={{ duration: 0.5, delay: idx * 0.4 }}
+            initial={{ opacity: 0, y: "50%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{
+              opacity: 0,
+              y: "50%",
+              transition: {
+                delay: idx * 0.4,
+                duration: 0.3,
+              },
+            }}
+          >
+            {node}
+          </motion.div>
+        </motion.div>
+      ))}
+    </>
+  );
 };
 
 function ImageSlider() {
@@ -56,7 +86,6 @@ function ImageSlider() {
     Math.max(opacityTransitionDuration, scaleTransitionDuration) * 1000;
 
   useEffect(() => {
-    console.log("Here");
     const interval = setTimeout(() => {
       changeSlide(1);
     }, automaticTransitionDelay * 1000);
@@ -69,15 +98,13 @@ function ImageSlider() {
     setIsAnimating(true);
     setDirection(direction);
 
+    setTimeout(() => setIsAnimating(false), animationDuration);
+
     if (direction == -1) {
       goPrevious();
     } else {
       goNext();
     }
-
-    setTimeout(() => {
-      setIsAnimating(false);
-    }, animationDuration);
   }
 
   function goNext() {
@@ -91,30 +118,36 @@ function ImageSlider() {
   }
 
   return (
-    <div className="h-[660px] relative group">
-      <AnimatePresence custom={direction} initial={false}>
+    <div className="h-[660px] relative group overflow-hidden" style={{ perspective: 500 }}>
+      <AnimatePresence custom={direction} initial={false} mode="wait">
         <motion.div
+          onTransitionEnd={(e) => console.log(e.eventPhase)}
           style={{ backgroundImage: `url(${images.at(currentIdx)})` }}
-          className="bg-no-repeat bg-cover bg-top h-full w-full absolute"
+          className="bg-no-repeat bg-cover bg-top h-full w-full absolute brightness-[0.3]"
           variants={variants}
           initial="initial"
           animate="animate"
           exit="exit"
           key={images.at(currentIdx)}
-          transition={{
-            opacity: {
-              duration: opacityTransitionDuration,
-            },
-
-            scale: {
-              duration: scaleTransitionDuration,
-            },
-          }}
+          transition={
+            {
+              // duration: 0.6
+              opacity: {
+                duration: opacityTransitionDuration,
+              },
+              rotateY: {
+                duration: 0.4,
+              },
+              scale: {
+                duration: scaleTransitionDuration,
+              },
+            }
+          }
           custom={direction}
         ></motion.div>
       </AnimatePresence>
       <Button
-        className="absolute left-10 top-1/2 -translate-y-1/2 hidden group-hover:block"
+        className="absolute left-10 top-1/2 -translate-y-1/2 hidden group-hover:block z-50"
         variant="ghost"
         size="icon"
         onClick={() => changeSlide(-1)}
@@ -122,48 +155,53 @@ function ImageSlider() {
         <ChevronLeftIcon className="w-8 h-8" />
       </Button>
       <Button
-        className="absolute right-10 top-1/2 -translate-y-1/2 hidden group-hover:block"
+        className="absolute right-10 top-1/2 -translate-y-1/2 hidden group-hover:block z-50"
         variant="ghost"
         size="icon"
         onClick={() => changeSlide(1)}
       >
         <ChevronRightIcon className="w-8 h-8" />
       </Button>
-      <motion.div
-        className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 text-center w-[800px]"
-        // transition={{ staggerChildren: 1 }}
-      >
-        <div className="overflow-hidden h-10 relative">
-          <AnimatePresence>
-            <motion.p
-              className="text-background text-4xl uppercase absolute w-full"
-              initial="hidden"
-              animate="revealIn"
-              exit="hideOut"
-              variants={textAnimation}
-              key={`${images.at(currentIdx)}-p`}
-              transition={{ duration: 2, type: "spring" }}
-            >
-              It software solution &
-            </motion.p>
-          </AnimatePresence>
-        </div>
-        <div className="overflow-hidden h-36 relative">
-          <AnimatePresence>
-            <motion.h2
-              className="text-foreground text-9xl font-bold absolute w-full"
-              initial="hidden"
-              animate="revealIn"
-              exit="hideOut"
-              variants={textAnimation}
-              key={`${images.at(currentIdx)}-h2`}
-              transition={{ duration: 2, type: "spring" }}
-            >
-              technology
-            </motion.h2>
-          </AnimatePresence>
-        </div>
-      </motion.div>
+      <AnimatePresence mode="wait">
+        {currentIdx == 0 ? (
+          <motion.div
+            className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 text-center w-full"
+            key={`${images.at(currentIdx)}-content-container`}
+          >
+            <SlideIn>
+              <p className="text-4xl uppercase font-medium text-primary">
+                Lorem ipsum dolor sit amet.
+              </p>
+              <b className="text-foreground text-9xl tracking-wider font-bold leading-[1.175]">
+                technology
+              </b>
+              <Button size="large" className="mt-5">
+                Get Started
+              </Button>
+            </SlideIn>
+          </motion.div>
+        ) : (
+          <motion.div
+            key={`${images.at(currentIdx)}-content-container`}
+            className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-full  text-start pl-28"
+          >
+            <SlideIn>
+              <p className="text-ascent-foreground text-7xl font-bold">
+                Experience in
+                <br /> Financial & Business
+                <br /> Services
+              </p>
+              <p className="text-ascent-foreground text-2xl">
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus,
+                culpa!
+              </p>
+              <Button size="large" className="mt-5">
+                Explore Now
+              </Button>
+            </SlideIn>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
